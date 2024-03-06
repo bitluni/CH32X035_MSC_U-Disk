@@ -577,7 +577,7 @@ void UDISK_Bulk_UpData( void )
     {
         len = UDISK_Transfer_DataLen;
         UDISK_Transfer_DataLen = 0x00;
-        Udisk_Transfer_Status &= ~DEF_UDISK_BLUCK_UP_FLAG;        
+        Udisk_Transfer_Status &= ~DEF_UDISK_BLUCK_UP_FLAG;
     }
 
     /* Load the data into the upload buffer and start the upload */
