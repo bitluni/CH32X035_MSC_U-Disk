@@ -18,13 +18,17 @@
 #endif 
 
 #define INTERNAL_FLASH_PAGE_SIZE  256
-#define IFLASH_UDISK_START_ADDR   0x5000               // 20K
+#define IFLASH_UDISK_START_ADDR   0x08005000
+//TODO #define IFLASH_UDISK_START_ADDR   0x5000               // 20K
 
+ /*TODO
 #if defined (CH32V20x_D6)
 #define IFLASH_UDISK_END_ADDR     0x37FFF
 #else
 #define IFLASH_UDISK_END_ADDR     0x77FFF
 #endif
+*/
+#define IFLASH_UDISK_END_ADDR   0x0800F7ff
 
 #define IFLASH_UDISK_SIZE         (IFLASH_UDISK_END_ADDR - IFLASH_UDISK_START_ADDR + 1 )
 

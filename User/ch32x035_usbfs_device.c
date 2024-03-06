@@ -311,6 +311,7 @@ uint16_t USBFSD_UEP_CTRL_Get(int endp)
         case DEF_UEP7:
             return USBFSD->UEP7_CTRL_H;
     }
+    return 0;
 }
 
 /*********************************************************************
