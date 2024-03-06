@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//Peripheral/inc/ch32x035_pwr.h=GBK
 encoding//Peripheral/inc/ch32x035_usb.h=GBK
 encoding//Peripheral/src/ch32x035_flash.c=GBK
 encoding//User/Internal_Flash.c=GBK

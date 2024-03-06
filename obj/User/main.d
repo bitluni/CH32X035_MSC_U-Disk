@@ -22,6 +22,8 @@ User/main.o: ../User/main.c ../User/ch32x035_usbfs_device.h \
  G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_wwdg.h \
  G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\USB\USBFS\DEVICE\MSC_U-Disk\User/ch32x035_it.h \
  G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_misc.h \
+ ../User/usb_desc.h \
+ G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_usb.h \
  ../User/Internal_Flash.h ../User/SPI_FLASH.h ../User/SW_UDISK.h
 
 ../User/ch32x035_usbfs_device.h:
@@ -71,6 +73,10 @@ G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_wwdg.h:
 G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\USB\USBFS\DEVICE\MSC_U-Disk\User/ch32x035_it.h:
 
 G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_misc.h:
+
+../User/usb_desc.h:
+
+G:\My\ Drive\Code\RiscV\CH32X035\EVT\EXAM\SRC\Peripheral\inc/ch32x035_usb.h:
 
 ../User/Internal_Flash.h:
 

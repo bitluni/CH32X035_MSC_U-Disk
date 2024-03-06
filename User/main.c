@@ -52,7 +52,7 @@ int main(void)
 
     /* Usb Init */
     USBFS_RCC_Init( );
-    USBFS_Device_Init( ENABLE );
+    USBFS_Device_Init( ENABLE, PWR_VDD_3V3);
     NVIC_EnableIRQ( USBFS_IRQn );
 
 	while(1)
