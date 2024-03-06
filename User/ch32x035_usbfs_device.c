@@ -150,6 +150,59 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     }
 }
 
+int USBFS_Endpoint_Mode_Get(int endp)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            //TODO 0
+            return 0;
+        case DEF_UEP1:
+            return USBFSD->UEP4_1_MOD >> 4;
+        case DEF_UEP2:
+            return USBFSD->UEP2_3_MOD & 0xf;
+        case DEF_UEP3:
+            return USBFSD->UEP2_3_MOD >> 4;
+        case DEF_UEP4:
+            return USBFSD->UEP4_1_MOD & 0xf;
+        case DEF_UEP5:
+            return (USBFSD->UEP567_MOD & 0x3) << 2;
+        case DEF_UEP6:
+            return ((USBFSD->UEP567_MOD >> 2) & 0x3) << 2;
+        case DEF_UEP7:
+            return ((USBFSD->UEP567_MOD >> 4) & 0x3) << 2;
+        //TODO 8-15
+    }
+    return 0;
+}
+
+void USBFSD_UEP_DMA_Set(int endp, uint32_t addr)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            USBFSD->UEP0_DMA = addr;
+            break;
+        case DEF_UEP1:
+            USBFSD->UEP1_DMA = addr;
+            break;
+        case DEF_UEP2:
+            USBFSD->UEP2_DMA = addr;
+            break;
+        case DEF_UEP3:
+            USBFSD->UEP3_DMA = addr;
+            break;
+        case DEF_UEP5:
+            USBFSD->UEP5_DMA = addr;
+            break;
+        case DEF_UEP6:
+            USBFSD->UEP6_DMA = addr;
+            break;
+        case DEF_UEP7:
+            USBFSD->UEP7_DMA = addr;
+            break;
+    }
+}
 
 /*********************************************************************
  * @fn      USBFS_Endp_DataUp
@@ -164,43 +217,11 @@ uint8_t USBFS_Endp_DataUp(uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod
     uint8_t buf_load_offset;
 
     /* DMA config, endp_ctrl config, endp_len config */
-    if( (endp>=DEF_UEP1) && (endp<=DEF_UEP7) )
+    if( (endp >= DEF_UEP1) && (endp <= DEF_UEP7) )
     {
         if( USBFS_Endp_Busy[ endp ] == 0 )
         {
-            if( (endp == DEF_UEP1) || (endp == DEF_UEP4) )
-            {
-                /* endp1/endp4 */
-                endp_mode = USBFSD_UEP_MOD(0);
-                if( endp == DEF_UEP1 )
-                {
-                    endp_mode = (uint8_t)(endp_mode>>4);
-                }
-            }
-            else if( (endp == DEF_UEP2) || (endp == DEF_UEP3) )
-            {
-                /* endp2/endp3 */
-                endp_mode = USBFSD_UEP_MOD(1);
-                if( endp == DEF_UEP3 )
-                {
-                    endp_mode = (uint8_t)(endp_mode>>4);
-                }
-            }
-            else if( (endp == DEF_UEP5) || (endp == DEF_UEP6) )
-            {
-                /* endp5/endp6 */
-                endp_mode = USBFSD_UEP_MOD(2);
-                if( endp == DEF_UEP6 )
-                {
-                    endp_mode = (uint8_t)(endp_mode>>4);
-                }
-            }
-            else
-            {
-                /* endp7 */
-                endp_mode = USBFSD_UEP_MOD(3);
-            }
-
+            endp_mode = USBFS_Endpoint_Mode_Get(endp);
             if( endp_mode & USBFSD_UEP_TX_EN )
             {
                 if( endp_mode & USBFSD_UEP_RX_EN )
@@ -217,7 +238,8 @@ uint8_t USBFS_Endp_DataUp(uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod
                     if( mod == DEF_UEP_DMA_LOAD )
                     {
                         /* DMA mode */
-                        USBFSD_UEP_DMA(endp) = (uint16_t)(uint32_t)pbuf;
+                        //TODO no endp 4
+                        USBFSD_UEP_DMA_Set(endp, (uint16_t)(uint32_t)pbuf);
                     }
                     else
                     {
