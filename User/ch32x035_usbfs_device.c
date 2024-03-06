@@ -91,6 +91,27 @@ void USBFS_Device_Endp_Init( void )
 }
 
 /*********************************************************************
+ * @fn      GPIO_USB_INIT
+ *
+ * @brief   Initializes USB GPIO.
+ *
+ * @return  none
+ */
+void GPIO_USB_INIT(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_16;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_17;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+}
+
+/*********************************************************************
  * @fn      USBFS_Device_Init
  *
  * @brief   Initializes USB device.
@@ -256,7 +277,8 @@ void USBFS_IRQHandler( void )
                     case USBFS_UIS_TOKEN_IN | DEF_UEP0:
                         if( USBFS_SetupReqLen == 0 )
                         {
-                            USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG | USBFS_UEP_R_RES_ACK;
+                            //TODO USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG | USBFS_UEP_R_RES_ACK;
+                            USBFSD->UEP0_CTRL_H = USBFS_UEP_R_TOG | USBFS_UEP_R_RES_ACK;
                         }
                         if ( ( USBFS_SetupReqType & USB_REQ_TYP_MASK ) != USB_REQ_TYP_STANDARD )
                         {
@@ -273,7 +295,8 @@ void USBFS_IRQHandler( void )
                                         USBFS_SetupReqLen -= len;
                                         pUSBFS_Descr += len;
                                         USBFSD->UEP0_TX_LEN   = len;
-                                        USBFSD->UEP0_TX_CTRL ^= USBFS_UEP_T_TOG;
+                                        //TODO USBFSD->UEP0_TX_CTRL ^= USBFS_UEP_T_TOG;
+                                        USBFSD->UEP0_CTRL_H ^= USBFS_UEP_T_TOG;
                                         break;
 
                                 case USB_SET_ADDRESS:
@@ -288,8 +311,10 @@ void USBFS_IRQHandler( void )
 
                     /* end-point 2 data in interrupt */
                     case ( USBFS_UIS_TOKEN_IN | DEF_UEP2 ):
-                        USBFSD->UEP2_TX_CTRL ^= USBFS_UEP_T_TOG;
-                        USBFSD->UEP2_TX_CTRL = (USBFSD->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_NAK;
+/*TODO                        USBFSD->UEP2_TX_CTRL ^= USBFS_UEP_T_TOG;
+                        USBFSD->UEP2_TX_CTRL = (USBFSD->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_NAK;*/
+                        USBFSD->UEP2_CTRL_H ^= USBFS_UEP_T_TOG;
+                        USBFSD->UEP2_CTRL_H = (USBFSD->UEP2_CTRL_H & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_NAK;
                         USBFS_Endp_Busy[ DEF_UEP2 ] = 0;
 						UDISK_In_EP_Deal();
                         break;
@@ -320,7 +345,8 @@ void USBFS_IRQHandler( void )
                             if( USBFS_SetupReqLen == 0 )
                             {
                                 USBFSD->UEP0_TX_LEN  = 0;
-                                USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG | USBFS_UEP_T_RES_ACK;
+//TODO                                USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG | USBFS_UEP_T_RES_ACK;
+                                USBFSD->UEP0_CTRL_H = USBFS_UEP_T_TOG | USBFS_UEP_T_RES_ACK;
                             }
                         }
                         break;
@@ -330,10 +356,13 @@ void USBFS_IRQHandler( void )
                         if ( intst & USBFS_UIS_TOG_OK )
                         {
                             len = USBFSD->RX_LEN;
-                            USBFSD->UEP3_RX_CTRL ^= USBFS_UEP_R_TOG;
-                            USBFSD->UEP3_RX_CTRL = (USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_NAK;
+/*TODO                            USBFSD->UEP3_RX_CTRL ^= USBFS_UEP_R_TOG;
+                            USBFSD->UEP3_RX_CTRL = (USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_NAK;*/
+                            USBFSD->UEP3_CTRL_H ^= USBFS_UEP_R_TOG;
+                            USBFSD->UEP3_CTRL_H = (USBFSD->UEP3_CTRL_H & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_NAK;
                             UDISK_Out_EP_Deal(UDisk_Out_Buf,len);
-                            USBFSD->UEP3_RX_CTRL = (USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_ACK;
+//TODO                            USBFSD->UEP3_RX_CTRL = (USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_ACK;
+                            USBFSD->UEP3_CTRL_H = (USBFSD->UEP3_CTRL_H & ~USBFS_UEP_R_RES_MASK) | USBFS_UEP_R_RES_ACK;
                         }
                         break;
                 }
@@ -341,8 +370,10 @@ void USBFS_IRQHandler( void )
 
             /* Setup stage processing */
             case USBFS_UIS_TOKEN_SETUP:
-                USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_NAK;
-                USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_NAK;
+/*                USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_NAK;
+                USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_NAK;*/
+                USBFSD->UEP0_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_NAK;
+                USBFSD->UEP0_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_NAK;
                 /* Store All Setup Values */
                 USBFS_SetupReqType  = pUSBFS_SetupReqPak->bRequestType;
                 USBFS_SetupReqCode  = pUSBFS_SetupReqPak->bRequest;
@@ -492,7 +523,8 @@ void USBFS_IRQHandler( void )
                                     {
                                         case ( DEF_UEP_IN | DEF_UEP2 ):
                                             /* Set End-point 2 IN NAK */
-                                            USBFSD->UEP2_TX_CTRL = USBFS_UEP_T_RES_NAK;
+//TODO                                            USBFSD->UEP2_TX_CTRL = USBFS_UEP_T_RES_NAK;
+                                            USBFSD->UEP2_CTRL = USBFS_UEP_T_RES_NAK;
                                             /* upload CSW */
                                             if( Udisk_Transfer_Status & DEF_UDISK_CSW_UP_FLAG )
                                             {
@@ -501,7 +533,8 @@ void USBFS_IRQHandler( void )
                                             break;
                                         case ( DEF_UEP_OUT | DEF_UEP3 ):
                                             /* Set End-point 3 OUT ACK */
-                                            USBFSD->UEP3_RX_CTRL = USBFS_UEP_R_RES_ACK;
+//TODO                                            USBFSD->UEP3_RX_CTRL = USBFS_UEP_R_RES_ACK;
+                                            USBFSD->UEP3_CTRL_H = USBFS_UEP_R_RES_ACK;
                                             /* upload CSW */
                                             if( Udisk_Transfer_Status & DEF_UDISK_CSW_UP_FLAG )
                                             {
@@ -556,12 +589,14 @@ void USBFS_IRQHandler( void )
                                     {
                                         case ( DEF_UEP_IN | DEF_UEP2 ):
                                             /* Set End-point 2 IN STALL */
-                                            USBFSD->UEP2_TX_CTRL = ( USBFSD->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK ) | USBFS_UEP_T_RES_STALL;
+//TODO                                            USBFSD->UEP2_TX_CTRL = ( USBFSD->UEP2_TX_CTRL & ~USBFS_UEP_T_RES_MASK ) | USBFS_UEP_T_RES_STALL;
+                                            USBFSD->UEP2_CTRL_H = ( USBFSD->UEP2_CTRL_H & ~USBFS_UEP_T_RES_MASK ) | USBFS_UEP_T_RES_STALL;
                                             break;
 
                                         case ( DEF_UEP_OUT | DEF_UEP3 ):
                                             /* Set End-point 3 OUT STALL */
-                                            USBFSD->UEP3_RX_CTRL = ( USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK ) | USBFS_UEP_R_RES_STALL;
+//TODO                                            USBFSD->UEP3_RX_CTRL = ( USBFSD->UEP3_RX_CTRL & ~USBFS_UEP_R_RES_MASK ) | USBFS_UEP_R_RES_STALL;
+                                            USBFSD->UEP3_CTRL_H = ( USBFSD->UEP3_CTRL_H & ~USBFS_UEP_R_RES_MASK ) | USBFS_UEP_R_RES_STALL;
                                             break;
 
                                         default:
@@ -608,14 +643,16 @@ void USBFS_IRQHandler( void )
                                 switch( (uint8_t)( USBFS_SetupReqIndex & 0xFF ) )
                                 {
                                     case ( DEF_UEP_IN | DEF_UEP2 ):
-                                        if( ( (USBFSD->UEP2_TX_CTRL) & USBFS_UEP_T_RES_MASK ) == USBFS_UEP_T_RES_STALL )
+//TODO                                        if( ( (USBFSD->UEP2_TX_CTRL) & USBFS_UEP_T_RES_MASK ) == USBFS_UEP_T_RES_STALL )
+                                        if( ( (USBFSD->UEP2_CTRL_H) & USBFS_UEP_T_RES_MASK ) == USBFS_UEP_T_RES_STALL )
                                         {
                                             USBFS_EP0_Buf[ 0 ] = 0x01;
                                         }
                                         break;
 
                                     case ( DEF_UEP_OUT | DEF_UEP3 ):
-                                        if( ( (USBFSD->UEP3_RX_CTRL) & USBFS_UEP_R_RES_MASK ) == USBFS_UEP_R_RES_STALL )
+//TODO                                        if( ( (USBFSD->UEP3_RX_CTRL) & USBFS_UEP_R_RES_MASK ) == USBFS_UEP_R_RES_STALL )
+                                        if( ( (USBFSD->UEP3_CTRL_H) & USBFS_UEP_R_RES_MASK ) == USBFS_UEP_R_RES_STALL )
                                         {
                                             USBFS_EP0_Buf[ 0 ] = 0x01;
                                         }
@@ -647,8 +684,10 @@ void USBFS_IRQHandler( void )
                 if( errflag == 0xFF)
                 {
                     /* if one request not support, return stall */
-                    USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_STALL;
-                    USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_STALL;
+/*TODO                    USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_STALL;
+                    USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_STALL;*/
+                    USBFSD->UEP0_CTRL_H = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_STALL;
+                    USBFSD->UEP0_CTRL_H = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_STALL;
                 }
                 else
                 {
@@ -659,7 +698,8 @@ void USBFS_IRQHandler( void )
                         len = (USBFS_SetupReqLen>DEF_USBD_UEP0_SIZE) ? DEF_USBD_UEP0_SIZE : USBFS_SetupReqLen;
                         USBFS_SetupReqLen -= len;
                         USBFSD->UEP0_TX_LEN  = len;
-                        USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
+//TODO                        USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
+                        USBFSD->UEP0_CTRL_H = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
                     }
                     else
                     {
@@ -667,11 +707,13 @@ void USBFS_IRQHandler( void )
                         if( USBFS_SetupReqLen == 0 )
                         {
                             USBFSD->UEP0_TX_LEN  = 0;
-                            USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
+//TODO                            USBFSD->UEP0_TX_CTRL = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
+                            USBFSD->UEP0_CTRL_H = USBFS_UEP_T_TOG|USBFS_UEP_T_RES_ACK;
                         }
                         else
                         {
-                            USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_ACK;
+//                            USBFSD->UEP0_RX_CTRL = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_ACK;
+                            USBFSD->UEP0_CTRL_H = USBFS_UEP_R_TOG|USBFS_UEP_R_RES_ACK;
                         }
                     }
                 }
