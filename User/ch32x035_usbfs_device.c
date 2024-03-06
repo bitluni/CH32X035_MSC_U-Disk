@@ -31,7 +31,7 @@ volatile uint8_t  USBFS_DevSleepStatus;
 volatile uint8_t  USBFS_DevEnumStatus;
 
 /* Endpoint Buffer */
-__attribute__ ((aligned(4))) uint8_t USBFS_EP0_Buf[ DEF_USBD_UEP0_SIZE ];    //ep0(64)
+__attribute__ ((aligned(4))) uint8_t USBFS_EP0_4Buf[ DEF_USBD_UEP0_SIZE ];    //ep0(64)
 __attribute__ ((aligned(4))) uint8_t UDisk_In_Buf[ DEF_UDISK_PACK_64 ];
 __attribute__ ((aligned(4))) uint8_t UDisk_Out_Buf[ DEF_UDISK_PACK_64 ];
 
@@ -67,7 +67,7 @@ void USBFS_Device_Endp_Init( void )
 
     USBFSD->UEP2_3_MOD = USBFS_UEP2_TX_EN|USBFS_UEP3_RX_EN;
 
-    USBFSD->UEP0_DMA = (uint32_t)USBFS_EP0_Buf;
+    USBFSD->UEP0_DMA = (uint32_t)USBFS_EP0_4Buf;
     USBFSD->UEP2_DMA = (uint32_t)UDisk_In_Buf;
     USBFSD->UEP3_DMA = (uint32_t)UDisk_Out_Buf;
 
@@ -150,6 +150,30 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     }
 }
 
+uint8_t* USBFSD_UEP_BUF(int endp)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            return (uint8_t*)USBFSD->UEP0_DMA;
+        case DEF_UEP1:
+            return (uint8_t*)USBFSD->UEP1_DMA;
+        case DEF_UEP2:
+            return (uint8_t*)USBFSD->UEP2_DMA;
+        case DEF_UEP3:
+            return (uint8_t*)USBFSD->UEP3_DMA;
+        case DEF_UEP4:  //TODO is this correct?
+            return (uint8_t*)USBFSD->UEP0_DMA;
+        case DEF_UEP5:
+            return (uint8_t*)USBFSD->UEP5_DMA;
+        case DEF_UEP6:
+            return (uint8_t*)USBFSD->UEP6_DMA;
+        case DEF_UEP7:
+            return (uint8_t*)USBFSD->UEP7_DMA;
+    }
+    return 0;
+}
+
 int USBFS_Endpoint_Mode_Get(int endp)
 {
     switch(endp)
@@ -204,6 +228,91 @@ void USBFSD_UEP_DMA_Set(int endp, uint32_t addr)
     }
 }
 
+void USBFSD_UEP_TLEN_Set(int endp, int len)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            USBFSD->UEP0_TX_LEN = len;
+            break;
+        case DEF_UEP1:
+            USBFSD->UEP1_TX_LEN = len;
+            break;
+        case DEF_UEP2:
+            USBFSD->UEP2_TX_LEN = len;
+            break;
+        case DEF_UEP3:
+            USBFSD->UEP3_TX_LEN = len;
+            break;
+        case DEF_UEP4:
+            USBFSD->UEP4_TX_LEN = len;
+            break;
+        case DEF_UEP5:
+            USBFSD->UEP5_TX_LEN = len;
+            break;
+        case DEF_UEP6:
+            USBFSD->UEP6_TX_LEN = len;
+            break;
+        case DEF_UEP7:
+            USBFSD->UEP7_TX_LEN = len;
+            break;
+    }
+}
+
+void USBFSD_UEP_CTRL_Set(int endp, int val)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            USBFSD->UEP0_CTRL_H = val;
+            break;
+        case DEF_UEP1:
+            USBFSD->UEP1_CTRL_H = val;
+            break;
+        case DEF_UEP2:
+            USBFSD->UEP2_CTRL_H = val;
+            break;
+        case DEF_UEP3:
+            USBFSD->UEP3_CTRL_H = val;
+            break;
+        case DEF_UEP4:
+            USBFSD->UEP4_CTRL_H = val;
+            break;
+        case DEF_UEP5:
+            USBFSD->UEP5_CTRL_H = val;
+            break;
+        case DEF_UEP6:
+            USBFSD->UEP6_CTRL_H = val;
+            break;
+        case DEF_UEP7:
+            USBFSD->UEP7_CTRL_H = val;
+            break;
+    }
+}
+
+uint16_t USBFSD_UEP_CTRL_Get(int endp)
+{
+    switch(endp)
+    {
+        case DEF_UEP0:
+            return USBFSD->UEP0_CTRL_H;
+        case DEF_UEP1:
+            return USBFSD->UEP1_CTRL_H;
+        case DEF_UEP2:
+            return USBFSD->UEP2_CTRL_H;
+        case DEF_UEP3:
+            return USBFSD->UEP3_CTRL_H;
+        case DEF_UEP4:
+            return USBFSD->UEP4_CTRL_H;
+        case DEF_UEP5:
+            return USBFSD->UEP5_CTRL_H;
+        case DEF_UEP6:
+            return USBFSD->UEP6_CTRL_H;
+        case DEF_UEP7:
+            return USBFSD->UEP7_CTRL_H;
+    }
+}
+
 /*********************************************************************
  * @fn      USBFS_Endp_DataUp
  *
@@ -254,9 +363,9 @@ uint8_t USBFS_Endp_DataUp(uint8_t endp, uint8_t *pbuf, uint16_t len, uint8_t mod
                 /* Set end-point busy */
                 USBFS_Endp_Busy[ endp ] = 0x01;
                 /* tx length */
-                USBFSD_UEP_TLEN(endp) = len;
+                USBFSD_UEP_TLEN_Set(endp, len);
                 /* response ack */
-                USBFSD_UEP_CTRL(endp) = (USBFSD_UEP_CTRL(endp) & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_ACK;
+                USBFSD_UEP_CTRL_Set(endp, (USBFSD_UEP_CTRL_Get(endp) & ~USBFS_UEP_T_RES_MASK) | USBFS_UEP_T_RES_ACK);
             }
         }
         else
@@ -313,7 +422,7 @@ void USBFS_IRQHandler( void )
                             {
                                 case USB_GET_DESCRIPTOR:
                                         len = USBFS_SetupReqLen >= DEF_USBD_UEP0_SIZE ? DEF_USBD_UEP0_SIZE : USBFS_SetupReqLen;
-                                        memcpy( USBFS_EP0_Buf, pUSBFS_Descr, len );
+                                        memcpy( USBFS_EP0_4Buf, pUSBFS_Descr, len );
                                         USBFS_SetupReqLen -= len;
                                         pUSBFS_Descr += len;
                                         USBFSD->UEP0_TX_LEN   = len;
@@ -411,8 +520,8 @@ void USBFS_IRQHandler( void )
                     {
                         if (USBFS_SetupReqCode == CMD_UDISK_GET_MAX_LUN)
                         {
-                            USBFS_EP0_Buf[0] = 0;
-                            pUSBFS_Descr = (uint8_t*)USBFS_EP0_Buf;
+                            USBFS_EP0_4Buf[0] = 0;
+                            pUSBFS_Descr = (uint8_t*)USBFS_EP0_4Buf;
                             len = 1;
                         }
                         else if (USBFS_SetupReqCode == CMD_UDISK_RESET)
@@ -501,7 +610,7 @@ void USBFS_IRQHandler( void )
                                 USBFS_SetupReqLen = len;
                             }
                             len = (USBFS_SetupReqLen >= DEF_USBD_UEP0_SIZE) ? DEF_USBD_UEP0_SIZE : USBFS_SetupReqLen;
-                            memcpy( USBFS_EP0_Buf, pUSBFS_Descr, len );
+                            memcpy( USBFS_EP0_4Buf, pUSBFS_Descr, len );
                             pUSBFS_Descr += len;
                             break;
 
@@ -512,7 +621,7 @@ void USBFS_IRQHandler( void )
 
                         /* Get usb configuration now set */
                         case USB_GET_CONFIGURATION:
-                            USBFS_EP0_Buf[0] = USBFS_DevConfig;
+                            USBFS_EP0_4Buf[0] = USBFS_DevConfig;
                             if ( USBFS_SetupReqLen > 1 )
                             {
                                 USBFS_SetupReqLen = 1;
@@ -639,7 +748,7 @@ void USBFS_IRQHandler( void )
 
                         /* This request allows the host to select another setting for the specified interface  */
                         case USB_GET_INTERFACE:
-                            USBFS_EP0_Buf[0] = 0x00;
+                            USBFS_EP0_4Buf[0] = 0x00;
                             if ( USBFS_SetupReqLen > 1 )
                             {
                                 USBFS_SetupReqLen = 1;
@@ -651,13 +760,13 @@ void USBFS_IRQHandler( void )
 
                         /* host get status of specified device/interface/end-points */
                         case USB_GET_STATUS:
-                            USBFS_EP0_Buf[ 0 ] = 0x00;
-                            USBFS_EP0_Buf[ 1 ] = 0x00;
+                            USBFS_EP0_4Buf[ 0 ] = 0x00;
+                            USBFS_EP0_4Buf[ 1 ] = 0x00;
                             if ( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_DEVICE )
                             {
                                 if( USBFS_DevSleepStatus & 0x01 )
                                 {
-                                    USBFS_EP0_Buf[ 0 ] = 0x02;
+                                    USBFS_EP0_4Buf[ 0 ] = 0x02;
                                 }
                             }
                             else if( ( USBFS_SetupReqType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_ENDP )
@@ -668,7 +777,7 @@ void USBFS_IRQHandler( void )
 //TODO                                        if( ( (USBFSD->UEP2_TX_CTRL) & USBFS_UEP_T_RES_MASK ) == USBFS_UEP_T_RES_STALL )
                                         if( ( (USBFSD->UEP2_CTRL_H) & USBFS_UEP_T_RES_MASK ) == USBFS_UEP_T_RES_STALL )
                                         {
-                                            USBFS_EP0_Buf[ 0 ] = 0x01;
+                                            USBFS_EP0_4Buf[ 0 ] = 0x01;
                                         }
                                         break;
 
@@ -676,7 +785,7 @@ void USBFS_IRQHandler( void )
 //TODO                                        if( ( (USBFSD->UEP3_RX_CTRL) & USBFS_UEP_R_RES_MASK ) == USBFS_UEP_R_RES_STALL )
                                         if( ( (USBFSD->UEP3_CTRL_H) & USBFS_UEP_R_RES_MASK ) == USBFS_UEP_R_RES_STALL )
                                         {
-                                            USBFS_EP0_Buf[ 0 ] = 0x01;
+                                            USBFS_EP0_4Buf[ 0 ] = 0x01;
                                         }
                                         break;
 
