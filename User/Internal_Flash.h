@@ -32,7 +32,8 @@
 
 #define IFLASH_UDISK_SIZE         (IFLASH_UDISK_END_ADDR - IFLASH_UDISK_START_ADDR + 1 )
 
-extern void IFlash_Prog_512(uint32_t address,uint32_t *pbuf);
+extern void IFlash_Prog_512(uint32_t address, uint32_t *pbuf);
+extern void IFlash_Prog_256(uint32_t address, uint32_t *pbuf);
 
 #ifdef __cplusplus
 }
